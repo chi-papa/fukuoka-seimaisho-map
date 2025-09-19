@@ -475,14 +475,63 @@
             fill: currentColor;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
+        /* プライバシーポリシーセクション */
+        .privacy-section {
+            margin-top: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
         }
 
-        body.dark .loading {
+        body.dark .privacy-section {
+            background: #1e1e1e;
+            border-color: #404040;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .privacy-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        body.dark .privacy-section h2 {
+            color: #ffffff;
+        }
+
+        .privacy-section h3 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        body.dark .privacy-section h3 {
+            color: #ffffff;
+        }
+
+        .privacy-section p, .privacy-section ul {
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        body.dark .privacy-section p, body.dark .privacy-section ul {
             color: #b0b0b0;
+        }
+
+        .privacy-section a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .privacy-section a:hover {
+            text-decoration: underline;
+        }
+
+        body.dark .privacy-section a {
+            color: #4fa8ff;
         }
 
         @media (max-width: 1024px) {
@@ -796,6 +845,16 @@ JA福岡市精米所,福岡市南区大橋1-15-3,https://maps.google.com/maps?q=
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     filterData();
+                    
+                    // Google Analytics - 検索イベント
+                    if (typeof gtag !== 'undefined' && e.target.value.trim()) {
+                        gtag('event', 'search', {
+                            event_category: 'Site Search',
+                            event_label: 'Seimaisho Search',
+                            search_term: e.target.value.trim(),
+                            page_location: window.location.href
+                        });
+                    }
                 }, 300);
             });
 
@@ -804,8 +863,52 @@ JA福岡市精米所,福岡市南区大橋1-15-3,https://maps.google.com/maps?q=
                 btn.addEventListener('click', () => {
                     document.querySelector('.filter-btn.active').classList.remove('active');
                     btn.classList.add('active');
+                    
+                    // Google Analytics - フィルタークリック
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'filter_click', {
+                            event_category: 'Site Interaction',
+                            event_label: 'Filter Applied',
+                            filter_type: btn.dataset.filter,
+                            page_location: window.location.href
+                        });
+                    }
+                    
                     filterData();
                 });
+            });
+            
+            // 地図リンククリックの追跡
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('map-link')) {
+                    const cardElement = e.target.closest('.seimaisho-card');
+                    const seimaishooName = cardElement ? cardElement.querySelector('.seimaisho-name').textContent : 'Unknown';
+                    
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'map_click', {
+                            event_category: 'External Link',
+                            event_label: 'Map Link Click',
+                            seimaisho_name: seimaishooName,
+                            page_location: window.location.href
+                        });
+                    }
+                }
+            });
+            
+            // テーマ切り替えの追跡
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark');
+                const currentTheme = body.classList.contains('dark') ? 'dark' : 'light';
+                updateThemeButton();
+                
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'theme_toggle', {
+                        event_category: 'Site Interaction',
+                        event_label: 'Theme Changed',
+                        theme: currentTheme,
+                        page_location: window.location.href
+                    });
+                }
             });
         });
     </script>
